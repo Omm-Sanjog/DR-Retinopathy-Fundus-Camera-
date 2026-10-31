@@ -1,0 +1,50 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+
+# ---------- Virtual environments ----------
+venv/
+.venv/
+env/
+.env
+
+# ---------- Jupyter ----------
+.ipynb_checkpoints/
+
+# ---------- Datasets (never commit) ----------
+data/
+datasets/
+dr_project/
+prep_*/
+*.parquet
+aptos*/
+
+# ---------- Patient / capture data (PRIVACY: never commit) ----------
+captures/
+records/
+patient_data/
+*.dcm
+
+# ---------- Large training artefacts ----------
+# ONNX models (16 MB) ARE allowed in raspberry-pi/models/; zip bundles and checkpoints are not
+*.zip
+checkpoints/
+runs/
+wandb/
+lightning_logs/
+
+# ---------- OS / editor ----------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# ---------- Office temp files ----------
+~$*
