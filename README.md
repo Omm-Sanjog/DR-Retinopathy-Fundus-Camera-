@@ -215,18 +215,6 @@ Estimated prototype cost **≈ ₹20,050** — see [`hardware/BOM.csv`](hardware
 - [ ] Ethics-approved data collection and validation against ophthalmologist grading
 - [ ] External testing on Messidor-2 and IDRiD
 
-## 👥 Team
-
-| Name | Role |
-|---|---|
-| **Omm Sanjog Barik** ([ORCID](https://orcid.org/0009-0009-4085-8099)) | Team lead — optics, embedded integration, ML pipeline |
-| Laganjeet Jena | Dataset, training and evaluation |
-| Piyush Raj | Edge deployment and Raspberry Pi software |
-| Riddhi Khanna | Literature, standards, ethics and testing |
-| **Prof. Prasant Kumar Patra** | Supervisor |
-
-School of Electronics Engineering, **KIIT (Deemed to be University)**, Bhubaneswar — Major Project (2026–2027)
-
 ## 📚 Citation
 
 If you use this work, please cite it — see [`CITATION.cff`](CITATION.cff) (GitHub shows a **“Cite this repository”** button).
