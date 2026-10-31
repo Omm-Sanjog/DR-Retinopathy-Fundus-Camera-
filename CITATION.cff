@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software or design, please cite it as below."
+title: "AI-Based Portable Fundus Camera and Analysing Unit for Diabetic Retinopathy Screening"
+abstract: "A low-cost, offline fundus camera built on a Raspberry Pi 5 with a 20 D condensing lens and NoIR camera, a quality and fundus-image gate, and an EfficientNet-B0 grader trained on APTOS 2019 (test QWK 0.877; referable-DR sensitivity 93.7 %, specificity 90.8 %)."
+type: software
+authors:
+  - family-names: Barik
+    given-names: Omm Sanjog
+    orcid: "https://orcid.org/0009-0009-4085-8099"
+    affiliation: "School of Electronics Engineering, KIIT (Deemed to be University)"
+  - family-names: Patra
+    given-names: Prasant Kumar
+    affiliation: "School of Electronics Engineering, KIIT (Deemed to be University)"
+  - family-names: Jena
+    given-names: Laganjeet
+    affiliation: "School of Electronics Engineering, KIIT (Deemed to be University)"
+  - family-names: Raj
+    given-names: Piyush
+    affiliation: "School of Electronics Engineering, KIIT (Deemed to be University)"
+  - family-names: Khanna
+    given-names: Riddhi
+    affiliation: "School of Electronics Engineering, KIIT (Deemed to be University)"
+repository-code: "https://github.com/Omm-Sanjog/fundus-dr-screening"
+license: MIT
+version: "1.0.0"
+date-released: "2026-11-01"
+keywords:
+  - diabetic retinopathy
+  - fundus imaging
+  - deep learning
+  - EfficientNet
+  - edge AI
+  - Raspberry Pi

@@ -1,0 +1,6 @@
+true\pred,no_dr,mild,moderate,severe,proliferative
+no_dr,250,20,1,0,0
+mild,6,21,26,3,0
+moderate,3,7,82,53,5
+severe,0,2,1,13,13
+proliferative,0,2,5,19,18
