@@ -24,7 +24,6 @@
 ![Raspberry Pi 5](https://img.shields.io/badge/Raspberry%20Pi-5-c51a4a)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
-<img src="docs/photos/prototype_v1_three_quarter.jpg" width="85%" alt="Prototype v1 of the AI fundus camera">
 
 *Prototype v1 — acrylic enclosure, front eyepiece mount, side display, rail-mounted camera carriage*
 
