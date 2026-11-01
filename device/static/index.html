@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FundusScan</title>
+<link rel="icon" href="/static/icon.svg">
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem("fundusscan-theme"); } catch (e) {}
+    if (!t) t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+<style>
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url(/static/fonts/barlow-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url(/static/fonts/barlow-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; font-display: swap; src: url(/static/fonts/barlow-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 700; font-display: swap; src: url(/static/fonts/barlow-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow Semi Condensed"; font-weight: 600; font-display: swap; src: url(/static/fonts/barlow-semi-condensed-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow Semi Condensed"; font-weight: 700; font-display: swap; src: url(/static/fonts/barlow-semi-condensed-latin-700-normal.woff2) format("woff2"); }
+
+:root {
+  --bg: #F3F5F8; --surface: #FFFFFF; --surface-2: #EAEEF3; --line: #D7DDE5;
+  --ink: #152030; --ink-2: #4A5668; --ink-3: #7B8696;
+  --accent: #1F3864; --accent-ink: #FFFFFF; --retina: #D9541F;
+  --ok: #1F8A5B; --warn: #B07216; --fail: #C0392B;
+  --viewer: #10151C;
+  --r-lg: 16px; --r-md: 10px;
+  --font: "Barlow", "DejaVu Sans", system-ui, sans-serif;
+  --font-num: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+  --shadow: 0 1px 2px rgba(21,32,48,.06), 0 10px 28px rgba(21,32,48,.10);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #12171E; --surface: #1B222B; --surface-2: #242C37; --line: #313B47;
+  --ink: #E7ECF2; --ink-2: #AAB5C2; --ink-3: #7F8B98;
+  --accent: #C9D8EE; --accent-ink: #12203A; --retina: #F07A45;
+  --ok: #4CC38A; --warn: #E0A53A; --fail: #F06A5D;
+  --viewer: #0A0E13;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 15px/1.45 var(--font); overflow: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 2px; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+.app { height: 100dvh; display: grid; grid-template-rows: auto 1fr; }
+.bar { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 14px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand img { width: 30px; height: 30px; }
+.brand b { font: 700 20px/1 var(--font-num); letter-spacing: .01em; }
+.brand small { display: block; font-size: 12px; color: var(--ink-3); line-height: 1.1; }
+.pill { display: inline-flex; align-items: center; gap: 7px; margin-left: 8px; padding: 5px 11px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); font-size: 13px; white-space: nowrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); flex: none; }
+.dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); } .dot.fail { background: var(--fail); }
+.spacer { flex: 1; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 42px; min-width: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--ink); font-weight: 500; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.danger { color: var(--fail); }
+
+.stage { min-height: 0; display: grid; grid-template-columns: 1fr 340px; }
+.viewer { position: relative; min-width: 0; min-height: 0; background: var(--viewer); display: grid; place-items: center; padding: 14px; }
+.viewport { position: relative; width: 100%; height: 100%; border-radius: var(--r-lg); overflow: hidden; background: #000; }
+#feed { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.ring { position: absolute; left: 50%; top: 50%; width: min(78%, 78vh); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; border: 3px dashed rgba(255,255,255,.55); pointer-events: none; transition: border-color .3s; }
+.ring.ok { border: 3px solid rgba(76,195,138,.95); box-shadow: 0 0 0 9999px rgba(0,0,0,.18); }
+.align { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); padding: 7px 14px; border-radius: 999px; background: rgba(8,12,16,.7); color: #fff; font-weight: 600; font-size: 15px; display: flex; gap: 8px; align-items: center; backdrop-filter: blur(6px); }
+.flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.flash.go { animation: flash .45s ease-out; }
+@keyframes flash { 0% { opacity: .85; } 100% { opacity: 0; } }
+.empty { position: absolute; inset: 0; display: none; place-content: center; justify-items: center; gap: 10px; text-align: center; color: #DCE3EA; padding: 24px; }
+.empty.show { display: grid; }
+.empty h2 { margin: 0; font: 600 21px/1.2 var(--font-num); color: #fff; }
+.empty p { margin: 0; max-width: 40ch; color: #B8C2CC; }
+
+.rail { min-height: 0; overflow-y: auto; background: var(--surface); border-left: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; padding: 14px 16px 18px; }
+.group h3 { margin: 0 0 8px; font: 600 15px/1.2 var(--font); display: flex; justify-content: space-between; align-items: center; }
+.field { display: grid; gap: 4px; margin-bottom: 8px; }
+.field label { font-size: 13px; color: var(--ink-2); }
+.field input, .field textarea { width: 100%; height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); }
+.field textarea { height: 56px; padding: 8px 10px; resize: none; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
+.seg button { height: 40px; border: 0; background: var(--surface); border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button.on { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.meter { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 9px; padding: 6px 0; font-size: 14px; border-bottom: 1px solid var(--surface-2); }
+.meter .v { font: 600 15px/1 var(--font-num); }
+.capture-wrap { display: grid; justify-items: center; gap: 8px; padding-top: 4px; }
+.shutter { width: 96px; height: 96px; border-radius: 50%; border: 5px solid var(--surface-2); background: var(--retina); color: #fff; display: grid; place-items: center; box-shadow: var(--shadow); transition: transform .1s; }
+.shutter:active { transform: scale(.95); }
+.shutter:disabled { opacity: .5; cursor: not-allowed; }
+.shutter svg { width: 38px; height: 38px; stroke-width: 2; }
+.hint { font-size: 13px; color: var(--ink-2); text-align: center; margin: 0; }
+.steps { margin: 0; padding-left: 18px; font-size: 13px; color: var(--ink-2); }
+.steps li { margin: 2px 0; }
+
+.overlay { position: fixed; inset: 0; background: rgba(8,12,18,.55); display: none; z-index: 20; }
+.overlay.show { display: grid; }
+.busy { place-items: center; }
+.busy .card { background: var(--surface); padding: 26px 30px; border-radius: var(--r-lg); box-shadow: var(--shadow); display: grid; justify-items: center; gap: 12px; min-width: 300px; }
+.spinner { width: 46px; height: 46px; border-radius: 50%; border: 5px solid var(--surface-2); border-top-color: var(--retina); animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.busy .stage-txt { font-weight: 600; }
+.sheet { grid-template-rows: auto 1fr; background: var(--bg); }
+.sheet .head { display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.sheet .head h2 { margin: 0 8px; font: 700 18px/1 var(--font-num); }
+.sheet iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+.drawer { justify-items: end; }
+.drawer .panel { width: min(440px, 100%); height: 100%; background: var(--surface); display: grid; grid-template-rows: auto 1fr; box-shadow: var(--shadow); }
+.drawer .panel .head { display: flex; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.drawer .panel .head h2 { margin: 0; font: 700 18px/1 var(--font-num); }
+.list { overflow-y: auto; padding: 8px; display: grid; gap: 6px; align-content: start; }
+.item { display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); text-align: left; }
+.item img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: #000; }
+.item .t { font-size: 12px; color: var(--ink-3); }
+.chip { padding: 3px 9px; border-radius: 999px; font: 600 13px/1.3 var(--font-num); color: #fff; white-space: nowrap; }
+.chip.routine { background: var(--ok); } .chip.refer { background: var(--warn); } .chip.urgent { background: var(--fail); } .chip.ungradable { background: var(--ink-3); }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: var(--r-md); box-shadow: var(--shadow); display: none; z-index: 40; max-width: 80vw; }
+.toast.show { display: block; }
+.banner { padding: 8px 12px; background: color-mix(in srgb, var(--fail) 14%, var(--surface)); color: var(--fail); font-size: 14px; border-bottom: 1px solid var(--line); display: none; }
+.banner.show { display: block; }
+@media (max-width: 860px) { .stage { grid-template-columns: 1fr; grid-template-rows: 46vh 1fr; } .rail { border-left: 0; border-top: 1px solid var(--line); } .brand small { display: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="bar">
+      <div class="brand"><img src="/static/icon.svg" alt=""><div><b>FundusScan</b><small>AI diabetic retinopathy screening</small></div></div>
+      <span class="pill" id="camPill"><span class="dot" id="camDot"></span><span id="camTxt">Connecting…</span></span>
+      <span class="spacer"></span>
+      <button class="btn" id="btnUpload" title="Analyse a saved photo"><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg><span>Upload</span></button>
+      <button class="btn" id="btnHistory" title="Previous scans"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>History</span></button>
+      <button class="btn" id="btnTheme" title="Light / dark"><svg class="i" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      <button class="btn" id="btnFull" title="Full screen"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <input type="file" id="file" accept="image/*" hidden>
+    </div>
+    <div class="banner" id="modelBanner"></div>
+  </header>
+
+  <main class="stage">
+    <section class="viewer">
+      <div class="viewport">
+        <img id="feed" alt="Live camera view">
+        <div class="ring" id="ring"></div>
+        <div class="align" id="alignTxt"><span class="dot" id="alignDot"></span><span>Waiting for camera…</span></div>
+        <div class="flash" id="flash"></div>
+        <div class="empty" id="empty"><h2>Camera not connected</h2><p id="emptyMsg">Check the USB cable, then wait a few seconds.</p></div>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <div class="group">
+        <h3>Patient <button class="btn" id="btnNewId" style="height:30px;font-size:13px">New ID</button></h3>
+        <div class="field"><label for="pid">Patient ID (anonymised)</label><input id="pid" autocomplete="off"></div>
+        <div class="row2">
+          <div class="field"><label for="age">Age</label><input id="age" inputmode="numeric" maxlength="3"></div>
+          <div class="field"><label for="dm">Diabetes (years)</label><input id="dm" inputmode="numeric" maxlength="3"></div>
+        </div>
+        <div class="field"><label>Sex</label><div class="seg" data-name="sex"><button data-v="Female">Female</button><button data-v="Male">Male</button><button data-v="Other">Other</button></div></div>
+        <div class="field"><label>Eye</label><div class="seg" data-name="eye"><button data-v="Right" class="on">Right (OD)</button><button data-v="Left">Left (OS)</button></div></div>
+        <div class="field"><label for="notes">Notes</label><textarea id="notes" maxlength="300"></textarea></div>
+      </div>
+
+      <div class="group">
+        <h3>Live image check</h3>
+        <div id="meters"></div>
+      </div>
+
+      <div class="capture-wrap">
+        <button class="shutter" id="shutter" title="Capture and analyse (Space)"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/></svg></button>
+        <p class="hint">Tap to capture &amp; analyse — the report opens automatically</p>
+      </div>
+
+      <div class="group">
+        <h3>How to capture</h3>
+        <ol class="steps">
+          <li>Dim the room so the pupil dilates naturally.</li>
+          <li>Patient rests forehead on the eyecup and looks straight ahead.</li>
+          <li>Slide the focus lever until the orange red reflex fills the circle and vessels look sharp.</li>
+          <li>Wait for <b>“Ready to capture”</b>, then tap the button.</li>
+        </ol>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<div class="overlay busy" id="busy"><div class="card"><div class="spinner"></div><div class="stage-txt" id="busyTxt">Capturing…</div><div style="font-size:13px;color:var(--ink-2)">Quality check → enhancement → AI grading</div></div></div>
+
+<div class="overlay sheet" id="sheet">
+  <div class="head">
+    <button class="btn" id="btnClose"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg><span>New scan</span></button>
+    <h2>Screening report</h2>
+    <span class="spacer"></span>
+    <button class="btn" id="btnRetake"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Retake</span></button>
+    <button class="btn primary" id="btnPrint"><svg class="i" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M8 14h8v7H8z"/></svg><span>Print / Save PDF</span></button>
+    <button class="btn danger" id="btnDelete" title="Delete this scan"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button>
+  </div>
+  <iframe id="reportFrame" title="Screening report"></iframe>
+</div>
+
+<div class="overlay drawer" id="drawer">
+  <div class="panel">
+    <div class="head"><h2>Previous scans</h2><span class="spacer"></span><button class="btn" id="btnCloseHist"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="list" id="histList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const state = { sex: "", eye: "Right", current: null, busy: false };
+const newId = () => { const d = new Date(), p = (n) => String(n).padStart(2, "0");
+  return `P-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`; };
+$("pid").value = newId();
+$("btnNewId").onclick = () => { $("pid").value = newId(); $("age").value = ""; $("dm").value = ""; $("notes").value = ""; setSeg("sex", ""); setSeg("eye", "Right"); };
+
+function setSeg(name, v) { state[name] = v; document.querySelectorAll(`.seg[data-name=${name}] button`).forEach(b => b.classList.toggle("on", b.dataset.v === v)); }
+document.querySelectorAll(".seg").forEach(s => s.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setSeg(s.dataset.name, b.dataset.v); }));
+
+function toast(msg, ms = 3500) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), ms); }
+
+$("btnTheme").onclick = () => { const r = document.documentElement, t = r.getAttribute("data-theme") === "dark" ? "light" : "dark"; r.setAttribute("data-theme", t); try { localStorage.setItem("fundusscan-theme", t); } catch (e) {} };
+$("btnFull").onclick = () => { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); };
+
+// ---- status & live checks ----
+let streamStarted = false;
+async function pollStatus() {
+  try {
+    const s = await (await fetch("/api/status")).json();
+    const c = s.camera, ok = c.status === "ok";
+    $("camDot").className = "dot " + (ok ? "ok" : c.status === "starting" ? "warn" : "fail");
+    $("camTxt").textContent = ok ? `${c.type === "test image" ? "Test image" : "Camera"}${c.fps ? " · " + c.fps + " fps" : ""}` : (c.message || "Camera not found");
+    $("empty").classList.toggle("show", !ok);
+    $("emptyMsg").textContent = c.message || "";
+    if (ok && !streamStarted) { $("feed").src = "/stream"; streamStarted = true; }
+    const b = $("modelBanner");
+    b.textContent = s.model.loaded ? "" : (s.model.error || "Model not loaded");
+    b.classList.toggle("show", !s.model.loaded);
+  } catch (e) { $("camDot").className = "dot fail"; $("camTxt").textContent = "Server not reachable"; }
+}
+async function pollLive() {
+  try {
+    const r = await (await fetch("/api/live")).json();
+    if (!r.ok) return;
+    $("meters").innerHTML = r.checks.map(c => `<div class="meter"><span class="dot ${c.status}"></span><span>${c.name.replace(" (red / green)", "")}</span><span class="v num">${c.value}</span></div>`).join("");
+    const ready = r.overall !== "fail";
+    $("ring").classList.toggle("ok", ready);
+    $("alignDot").className = "dot " + (ready ? (r.overall === "ok" ? "ok" : "warn") : "fail");
+    const retina = r.checks[0].status !== "fail";
+    $("alignTxt").lastElementChild.textContent = ready ? (r.overall === "ok" ? "Ready to capture" : "Usable — fine-tune focus") :
+      (!retina ? "Align: find the red reflex" : (r.checks[1].status === "fail" ? "Adjust focus" : "Adjust illumination"));
+  } catch (e) {}
+}
+pollStatus(); setInterval(pollStatus, 3000); setInterval(pollLive, 700);
+
+// ---- capture / upload ----
+function patient() { return { id: $("pid").value.trim(), age: $("age").value.trim(), sex: state.sex, eye: state.eye, diabetes_years: $("dm").value.trim(), notes: $("notes").value.trim() }; }
+async function run(fetcher) {
+  if (state.busy) return; state.busy = true; $("shutter").disabled = true;
+  $("busyTxt").textContent = "Analysing…"; $("busy").classList.add("show");
+  try {
+    const res = await fetcher(); const r = await res.json();
+    if (!res.ok) throw new Error(r.error || "Analysis failed");
+    openReport(r.id);
+  } catch (e) { toast(e.message); }
+  finally { $("busy").classList.remove("show"); state.busy = false; $("shutter").disabled = false; }
+}
+function capture() {
+  $("flash").classList.remove("go"); void $("flash").offsetWidth; $("flash").classList.add("go");
+  run(() => fetch("/api/capture", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ patient: patient() }) }));
+}
+$("shutter").onclick = capture;
+document.addEventListener("keydown", (e) => { if ((e.code === "Space" || e.code === "Enter") && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) && !$("sheet").classList.contains("show")) { e.preventDefault(); capture(); } });
+$("btnUpload").onclick = () => $("file").click();
+$("file").onchange = () => { const f = $("file").files[0]; if (!f) return; const fd = new FormData(); fd.append("photo", f); fd.append("patient", JSON.stringify(patient())); $("file").value = ""; run(() => fetch("/api/analyze", { method: "POST", body: fd })); };
+
+// ---- report sheet ----
+function openReport(id) { state.current = id; $("reportFrame").src = "/report?id=" + encodeURIComponent(id); $("drawer").classList.remove("show"); $("sheet").classList.add("show"); }
+$("btnClose").onclick = () => { $("sheet").classList.remove("show"); $("pid").value = newId(); };
+$("btnRetake").onclick = () => $("sheet").classList.remove("show");
+$("btnPrint").onclick = () => { try { $("reportFrame").contentWindow.print(); } catch (e) { window.open("/report?id=" + state.current); } };
+$("btnDelete").onclick = async () => { if (!state.current) return; await fetch("/api/scan/" + state.current, { method: "DELETE" }); $("sheet").classList.remove("show"); toast("Scan deleted"); };
+
+// ---- history ----
+const LEVEL_TXT = { routine: "No referral", refer: "Refer", urgent: "Urgent", ungradable: "Retake" };
+$("btnHistory").onclick = async () => {
+  const items = await (await fetch("/api/history")).json();
+  $("histList").innerHTML = items.length ? items.map(i => `<button class="item" data-id="${i.id}"><img src="${i.thumb}" alt=""><div><b>${i.patient || "—"}</b> · ${i.eye || ""}<div class="t">${new Date(i.time).toLocaleString()} · ${i.grade_name || "no grade"}</div></div><span class="chip ${i.level || "ungradable"}">${LEVEL_TXT[i.level] || "—"}</span></button>`).join("") : `<p style="padding:12px;color:var(--ink-2)">No scans yet.</p>`;
+  $("drawer").classList.add("show");
+};
+$("histList").onclick = (e) => { const b = e.target.closest(".item"); if (b) openReport(b.dataset.id); };
+$("btnCloseHist").onclick = () => $("drawer").classList.remove("show");
+$("drawer").onclick = (e) => { if (e.target === $("drawer")) $("drawer").classList.remove("show"); };
+</script>
+</body>
+</html>

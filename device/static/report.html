@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DR Screening Report</title>
+<style>
+@font-face { font-family: "Barlow"; font-weight: 400; src: url(/static/fonts/barlow-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; src: url(/static/fonts/barlow-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 600; src: url(/static/fonts/barlow-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 700; src: url(/static/fonts/barlow-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow Semi Condensed"; font-weight: 600; src: url(/static/fonts/barlow-semi-condensed-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Barlow Semi Condensed"; font-weight: 700; src: url(/static/fonts/barlow-semi-condensed-latin-700-normal.woff2) format("woff2"); }
+:root { --ink: #152030; --ink-2: #4A5668; --ink-3: #7B8696; --line: #D7DDE5; --soft: #F3F5F8; --navy: #1F3864;
+  --ok: #1F8A5B; --warn: #B07216; --fail: #C0392B; --g0: #1BAF7A; --g1: #7FBF3F; --g2: #EDA100; --g3: #EB6834; --g4: #E34948;
+  --font: "Barlow", "DejaVu Sans", Arial, sans-serif; --num: "Barlow Semi Condensed", "Barlow", Arial, sans-serif; color-scheme: light; }
+* { box-sizing: border-box; }
+html { background: #E9EDF2; }
+body { margin: 0; font: 400 13.5px/1.45 var(--font); color: var(--ink); background: #E9EDF2; -webkit-font-smoothing: antialiased; }
+.page { width: 210mm; min-height: 297mm; margin: 18px auto; background: #fff; padding: 14mm 14mm 12mm; box-shadow: 0 4px 24px rgba(0,0,0,.12); }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums; }
+header { display: flex; align-items: center; gap: 12px; border-bottom: 3px solid var(--navy); padding-bottom: 10px; }
+header img { width: 44px; height: 44px; }
+header h1 { margin: 0; font: 700 22px/1.1 var(--num); color: var(--navy); }
+header .sub { color: var(--ink-2); font-size: 12.5px; }
+header .meta { margin-left: auto; text-align: right; font-size: 12px; color: var(--ink-2); }
+header .meta b { color: var(--ink); font-family: var(--num); font-size: 14px; }
+h2 { font: 700 14px/1.2 var(--num); text-transform: uppercase; letter-spacing: .06em; color: var(--navy); margin: 16px 0 6px; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.grid div { padding: 7px 10px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.grid div:nth-child(4n) { border-right: 0; }
+.grid div:nth-last-child(-n+4) { border-bottom: 0; }
+.grid small { display: block; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.grid span { font-weight: 600; }
+.result { margin-top: 14px; border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; color: #fff; }
+.result.routine { background: var(--ok); } .result.refer { background: var(--warn); } .result.urgent { background: var(--fail); } .result.ungradable { background: #6B7686; }
+.result .grade { font: 700 26px/1.1 var(--num); }
+.result .action { font: 700 17px/1.2 var(--num); }
+.result .advice { grid-column: 1 / -1; font-size: 14px; opacity: .96; }
+.result .side { text-align: right; font-size: 12.5px; }
+.result .side b { display: block; font: 700 20px/1.1 var(--num); }
+.scale { margin-top: 12px; }
+.bar { position: relative; display: grid; grid-template-columns: var(--cols); height: 30px; border-radius: 6px; overflow: hidden; }
+.bar div { display: grid; place-items: center; color: #fff; font: 700 12px/1 var(--num); }
+.barwrap { position: relative; padding-bottom: 22px; }
+.marker { position: absolute; top: -5px; width: 4px; margin-left: -2px; height: 40px; background: var(--ink); border-radius: 2px; box-shadow: 0 0 0 2px #fff; }
+.marker::after { content: attr(data-l); position: absolute; top: 42px; left: -40px; width: 84px; text-align: center; font: 700 12px/1.3 var(--num); color: var(--ink); }
+.imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.imgs figure { margin: 0; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.imgs img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #000; }
+.imgs figcaption { flex: 1; padding: 6px 9px; font-size: 12px; color: var(--ink-2); background: var(--soft); }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { background: var(--soft); font-weight: 600; color: var(--ink-2); font-size: 11.5px; text-transform: uppercase; letter-spacing: .03em; }
+.st { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.st::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.st.ok { color: var(--ok); } .st.warn { color: var(--warn); } .st.fail { color: var(--fail); }
+tr.cur td { background: #FFF6E5; font-weight: 600; }
+.two { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; }
+.note { margin-top: 12px; padding: 9px 12px; border-left: 4px solid var(--warn); background: #FFF8EC; font-size: 12px; color: #5A4A2A; }
+.sign { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 26px; }
+.sign div { border-top: 1px solid var(--ink-3); padding-top: 5px; font-size: 12px; color: var(--ink-2); }
+footer { margin-top: 14px; font-size: 11px; color: var(--ink-3); display: flex; justify-content: space-between; }
+.err { padding: 40px; text-align: center; color: var(--fail); }
+@media print { html, body { background: #fff; } .page { margin: 0; box-shadow: none; width: auto; min-height: auto; padding: 0; } @page { size: A4; margin: 11mm; } }
+@media (max-width: 820px) { .page { width: auto; margin: 0; padding: 14px; } .grid { grid-template-columns: repeat(2, 1fr); } .two, .imgs { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page" id="page"><p class="err" id="msg">Loading report…</p></div>
+<script>
+const id = new URLSearchParams(location.search).get("id");
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const GRADE_ROWS = [
+  ["0", "No DR", "No visible abnormalities.", "Re-screen in 12 months"],
+  ["1", "Mild NPDR", "Microaneurysms only.", "Re-screen in 6–12 months"],
+  ["2", "Moderate NPDR", "More than microaneurysms but less than severe NPDR.", "Refer (non-urgent)"],
+  ["3", "Severe NPDR", "4-2-1 rule: extensive haemorrhages, venous beading or IRMA.", "Refer urgently"],
+  ["4", "Proliferative DR", "Neovascularisation, vitreous / pre-retinal haemorrhage.", "Refer urgently"],
+];
+fetch("/api/scan/" + encodeURIComponent(id)).then(r => { if (!r.ok) throw new Error("Report not found"); return r.json(); }).then(render)
+  .catch(e => { document.getElementById("msg").textContent = e.message; });
+
+function render(r) {
+  const p = r.patient || {}, res = r.result, q = r.quality, m = r.model, t0 = m.test_metrics || {};
+  const tm = { qwk: t0.qwk, sensitivity: t0.referable_sensitivity ?? t0.sensitivity, specificity: t0.referable_specificity ?? t0.specificity, auc: t0.referable_auc ?? t0.auc };
+  const t = new Date(r.time);
+  document.title = `DR report ${p.id || ""} ${p.eye || ""}`;
+  const level = res ? res.level : "ungradable";
+  const th = m.thresholds || [0.5, 1.5, 2.5, 3.5];
+  // scale: 0 .. 4.5 mapped across segments defined by thresholds
+  const edges = [-0.5, ...th, 4.5], span = 5.0;
+  const cols = edges.slice(1).map((e, i) => ((e - edges[i]) / span * 100).toFixed(2) + "%").join(" ");
+  const pos = res ? Math.min(Math.max((res.score + 0.5) / span * 100, 1), 99) : null;
+
+  document.getElementById("page").innerHTML = `
+  <header>
+    <img src="/static/icon.svg" alt="">
+    <div><h1>Diabetic Retinopathy Screening Report</h1>
+      <div class="sub">FundusScan · AI fundus camera prototype · School of Electronics Engineering, KIIT</div></div>
+    <div class="meta">Report ID<br><b>${esc(r.id)}</b><br>${t.toLocaleDateString()} ${t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
+  </header>
+
+  <h2>Patient &amp; examination</h2>
+  <div class="grid">
+    <div><small>Patient ID</small><span>${esc(p.id) || "—"}</span></div>
+    <div><small>Age</small><span>${esc(p.age) || "—"}</span></div>
+    <div><small>Sex</small><span>${esc(p.sex) || "—"}</span></div>
+    <div><small>Eye</small><span>${esc(p.eye) === "Left" ? "Left (OS)" : "Right (OD)"}</span></div>
+    <div><small>Diabetes duration</small><span>${p.diabetes_years ? esc(p.diabetes_years) + " years" : "—"}</span></div>
+    <div><small>Image source</small><span>${r.source === "upload" ? "Uploaded photo" : "Device camera"}</span></div>
+    <div><small>Image quality</small><span class="st ${q.overall}">${{ ok: "Good", warn: "Acceptable", fail: "Not gradable" }[q.overall]}</span></div>
+    <div><small>Analysis time</small><span class="num">${(m.total_ms / 1000).toFixed(1)} s</span></div>
+  </div>
+
+  ${res ? `
+  <div class="result ${level}">
+    <div><div class="grade">Grade ${res.grade} — ${esc(res.grade_name)}</div><div class="action">${esc(res.action)}</div></div>
+    <div class="side">Referable DR<b>${res.gradable ? (res.referable ? "YES" : "NO") : "—"}</b>Confidence: ${esc(res.confidence)}</div>
+    <div class="advice">${esc(res.advice)}</div>
+  </div>
+  <div class="scale">
+    <div class="barwrap"><div class="bar" style="--cols:${cols}">
+      ${["No DR", "Mild", "Moderate", "Severe", "Proliferative"].map((n, i) => `<div style="background:var(--g${i})">${n}</div>`).join("")}
+    </div><span class="marker" style="left:${pos}%" data-l="▲ score ${res.score.toFixed(2)}"></span></div>
+  </div>` : `<div class="result ungradable"><div><div class="grade">No grade</div><div class="action">AI model not available</div></div><div class="advice">${esc(r.model_error || "")}</div></div>`}
+
+  <h2>Images</h2>
+  <div class="imgs">
+    <figure><img src="${r.images.fundus}" alt="Captured fundus"><figcaption>Captured fundus image (border removed)</figcaption></figure>
+    <figure><img src="${r.images.enhanced}" alt="Enhanced fundus"><figcaption>Enhanced view analysed by the AI (local-contrast normalised, ${esc(m.input)})</figcaption></figure>
+  </div>
+
+  <div class="two">
+    <div>
+      <h2>Image quality checks</h2>
+      <table><tr><th>Check</th><th>Value</th><th>Result</th></tr>
+        ${q.checks.map(c => `<tr><td>${esc(c.name)}<br><span style="color:var(--ink-3);font-size:11.5px">${esc(c.text)}</span></td><td class="num">${esc(c.value)}</td><td><span class="st ${c.status}">${{ ok: "Pass", warn: "Caution", fail: "Fail" }[c.status]}</span></td></tr>`).join("")}
+      </table>
+    </div>
+    <div>
+      <h2>Grading scale (ICDR)</h2>
+      <table><tr><th>Grade</th><th>Findings</th><th>Action</th></tr>
+        ${GRADE_ROWS.map(g => `<tr class="${res && String(res.grade) === g[0] ? "cur" : ""}"><td>${g[0]} · ${g[1]}</td><td>${g[2]}</td><td>${g[3]}</td></tr>`).join("")}
+      </table>
+    </div>
+  </div>
+
+  <h2>Method</h2>
+  <table>
+    <tr><td style="width:34%">AI model</td><td>${esc(m.name)} · input ${esc(m.input)} · file ${esc(m.file || "—")}</td></tr>
+    <tr><td>Training data</td><td>${esc(m.trained_on)} (3,662 graded fundus images)</td></tr>
+    <tr><td>Test performance (APTOS hold-out, n = 550)</td><td>QWK ${tm.qwk ?? "—"} · referable-DR sensitivity ${tm.sensitivity ? (tm.sensitivity * 100).toFixed(1) + " %" : "—"} · specificity ${tm.specificity ? (tm.specificity * 100).toFixed(1) + " %" : "—"} · AUC ${tm.auc ?? "—"}</td></tr>
+    <tr><td>Grade thresholds on score</td><td class="num">${th.map(v => v.toFixed(2)).join(" · ")}${res ? ` &nbsp;|&nbsp; model score ${res.score.toFixed(3)} · inference ${Math.round(res.inference_ms)} ms` : ""}</td></tr>
+    ${p.notes ? `<tr><td>Operator notes</td><td>${esc(p.notes)}</td></tr>` : ""}
+  </table>
+
+  <div class="note"><b>Screening aid — not a medical diagnosis.</b> This report is produced by a research prototype that has not been clinically validated or approved by a regulator. It grades diabetic retinopathy only and does not detect other eye diseases (e.g. glaucoma, macular degeneration). A normal result does not replace a full eye examination. Any patient with visual symptoms should be referred regardless of this result.</div>
+
+  <div class="sign"><div>Screened by (name &amp; signature)</div><div>Reviewed by ophthalmologist (name &amp; signature)</div></div>
+  <footer><span>FundusScan · github.com/Omm-Sanjog/DR-Retinopathy-Fundus-Camera-</span><span>Generated ${new Date().toLocaleString()}</span></footer>`;
+}
+</script>
+</body>
+</html>
