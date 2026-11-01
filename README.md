@@ -251,18 +251,6 @@ Prototype cost **₹39,390 (≈ ₹40,000)** at Robu.in / retail prices (Nov 202
 - [ ] Ethics-approved data collection and validation against ophthalmologist grading
 - [ ] External testing on Messidor-2 and IDRiD
 
-## 👥 Team
-
-| Name | Role |
-|---|---|
-| **Omm Sanjog Barik** ([ORCID](https://orcid.org/0009-0009-4085-8099)) | **Team lead** — system architecture, hardware development, backend & software (training pipeline, on-device inference, quality gates), integration |
-| Laganjeet Jena | Hardware development — enclosure, mechanics, wiring, assembly |
-| Piyush Raj | GitHub, UI/UX and deployment |
-| Riddhi Khanna | GitHub, UI/UX and deployment |
-| **Prof. Prasant Kumar Patra** | Supervisor |
-
-School of Electronics Engineering, **KIIT (Deemed to be University)**, Bhubaneswar — Major Project (2026–2027)
-
 ## 📚 Citation
 
 If you use this work, please cite it — see [`CITATION.cff`](CITATION.cff) (GitHub shows a **“Cite this repository”** button).
