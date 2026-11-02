@@ -52,6 +52,17 @@ python pi_inference.py ../assets/sample_fundus_synthetic.png
 FUNDUS_FAKE_IMAGE=../assets/sample_fundus_synthetic.png python server.py   # then open http://localhost:8000
 ```
 
+## D. Phone / web version (Vercel, branch `web-app`)
+
+```bash
+# deploy: commit device/models/dr_model_fp32.onnx, import the repo on vercel.com, choose this branch
+# local test:
+cd web && npm install && npm run dev        # http://localhost:5173
+```
+
+On the phone: open the site → *Add to Home Screen* → tap **FundusScan** → **Start lens camera**.
+Full guide: [`web/README.md`](../web/README.md).
+
 ## Troubleshooting
 
 | Problem | Fix |
@@ -62,6 +73,8 @@ FUNDUS_FAKE_IMAGE=../assets/sample_fundus_synthetic.png python server.py   # the
 | Colab “Failed to assign a backend” | No free GPU right now — pick CPU runtime; the notebook adapts automatically |
 | Icon does nothing / “Not installed yet” | Run `bash install.sh` in `device/`; see `device/server.log` |
 | Report says “Model not loaded” | Copy `dr_model_fp32.onnx` into `device/models/` |
+| Web build log says `model: missing` | Commit `dr_model_fp32.onnx` to `device/models/` without Git LFS |
+| Web: camera does not open | The site must be HTTPS (Vercel is); allow camera permission in browser settings |
 | ~3 s per image on the Pi | Expected for FP32 at 384 px; see roadmap for optimisation |
 
 > Research prototype — not for diagnostic use.
