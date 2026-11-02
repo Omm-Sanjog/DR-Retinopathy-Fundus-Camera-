@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FundusScan</title>
+<meta name="description" content="AI diabetic retinopathy screening on your phone with a fundus lens kit. Photos are analysed on the device and never uploaded.">
+<meta name="theme-color" content="#1F3864">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FundusScan">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============================== HOME ============================== -->
+<section id="home" class="view active">
+  <header class="top">
+    <div class="brand"><img src="icon.svg" alt=""><div><b>FundusScan</b><small>AI diabetic retinopathy screening</small></div></div>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnHistory" aria-label="History"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></button>
+      <button class="icon-btn" id="btnTheme" aria-label="Theme"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="card model" id="modelCard">
+      <div class="model-row"><span class="dot" id="modelDot"></span><span id="modelText">Preparing the AI model…</span></div>
+      <div class="bar"><i id="modelBar"></i></div>
+      <small id="modelSub">First time only (~30 MB). After that FundusScan works offline.</small>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Patient</h2><button class="chip-btn" id="btnNewId">New ID</button></div>
+      <label class="fld"><span>Patient ID (anonymised)</span><input id="pId" autocomplete="off"></label>
+      <div class="row2">
+        <label class="fld"><span>Age</span><input id="pAge" inputmode="numeric" maxlength="3"></label>
+        <label class="fld"><span>Diabetes (years)</span><input id="pDia" inputmode="numeric" maxlength="2"></label>
+      </div>
+      <div class="fld"><span>Sex</span><div class="seg" data-name="sex"><button>Female</button><button>Male</button><button>Other</button></div></div>
+      <div class="fld"><span>Eye</span><div class="seg" data-name="eye"><button class="on">Right (OD)</button><button>Left (OS)</button></div></div>
+      <label class="fld"><span>Notes</span><input id="pNotes" placeholder="e.g. dilated, lens kit #2" autocomplete="off"></label>
+    </div>
+
+    <button class="big primary" id="btnLive">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/></svg>
+      <span><b>Start lens camera</b><small>Live checks · auto-captures the sharpest frame</small></span>
+    </button>
+    <div class="row2 gap">
+      <label class="big secondary"><input type="file" accept="image/*" capture="environment" id="inCamera" hidden>
+        <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span><b>Camera app</b><small>Full-resolution photo</small></span></label>
+      <label class="big secondary"><input type="file" accept="image/*" id="inGallery" hidden>
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 16 5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></svg><span><b>Photo library</b><small>Analyse a saved image</small></span></label>
+    </div>
+
+    <div class="links">
+      <button class="link" id="btnGuide">How to use a lens kit</button>
+      <button class="link" id="btnSample">Try the sample image</button>
+      <button class="link hidden" id="btnInstall">Install app</button>
+    </div>
+
+    <p class="fine">🔒 Photos are analysed <b>on this device</b> and are never uploaded. Reports are kept in this browser only.<br>
+      Research prototype — a screening aid, <b>not a medical diagnosis</b>.</p>
+    <p class="fine tiny" id="buildInfo"></p>
+  </main>
+</section>
+
+<!-- ============================== LIVE CAMERA ============================== -->
+<section id="camera" class="view dark">
+  <div class="cam-stage">
+    <video id="video" playsinline muted autoplay></video>
+    <canvas id="overlay"></canvas>
+    <div class="flash" id="flash"></div>
+  </div>
+  <div class="cam-top">
+    <button class="icon-btn glass" id="btnCamClose" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <div class="cam-chip" id="camChip">Starting camera…</div>
+    <button class="icon-btn glass" id="btnCamHelp" aria-label="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17.5v.01"/></svg></button>
+  </div>
+  <div class="cam-bottom">
+    <div class="pills" id="pills">
+      <span class="pill" data-k="retina">Retina</span><span class="pill" data-k="focus">Focus</span>
+      <span class="pill" data-k="light">Light</span><span class="pill" data-k="size">Size</span>
+    </div>
+    <div class="zoom hidden" id="zoomBox"><span>1×</span><input type="range" id="zoom" min="1" max="4" step="0.1" value="1"><span id="zoomVal">1×</span></div>
+    <div class="cam-controls">
+      <button class="ctl" id="btnTorch" aria-label="Torch"><svg viewBox="0 0 24 24"><path d="M8 2h8l-1 6H9zM9 8h6l-1 6v8h-4v-8z"/></svg><small>Torch</small></button>
+      <button class="shutter" id="btnShutter" aria-label="Capture"><svg viewBox="0 0 100 100"><circle class="ring" cx="50" cy="50" r="46"/><circle class="prog" id="prog" cx="50" cy="50" r="46"/></svg><i></i></button>
+      <button class="ctl on" id="btnAuto" aria-label="Auto capture"><svg viewBox="0 0 24 24"><path d="M4 17 9 5h2l5 12M6 13h8"/><path d="M18 4v6M15 7h6"/></svg><small>Auto</small></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== REVIEW / CROP ============================== -->
+<section id="review" class="view dark">
+  <div class="rev-top">
+    <button class="icon-btn glass" id="btnRevBack" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div><b>Check the retina circle</b><small id="revMsg">Drag the circle to fit the retina, then analyse.</small></div>
+  </div>
+  <div class="rev-stage"><canvas id="revCanvas"></canvas></div>
+  <div class="rev-bottom">
+    <label class="size-row"><span>Circle size</span><input type="range" id="revSize" min="5" max="75" step="0.5"></label>
+    <div class="row3">
+      <button class="pill-btn" id="btnAutoCircle">Auto-detect</button>
+      <button class="pill-btn" id="btnWhole">Whole image</button>
+      <button class="pill-btn" id="btnRetake">Retake</button>
+    </div>
+    <button class="big primary" id="btnAnalyse"><span><b>Analyse</b><small>On-device AI · about 1–3 s</small></span>
+      <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+</section>
+
+<!-- ============================== REPORT ============================== -->
+<section id="report" class="view">
+  <header class="top sticky no-print">
+    <button class="text-btn" id="btnNewScan"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>New scan</button>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnShare" aria-label="Share"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/></svg></button>
+      <button class="icon-btn" id="btnPrint" aria-label="Print or save PDF"><svg viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3"/><path d="M7 14h10v7H7z"/></svg></button>
+      <button class="icon-btn danger" id="btnDelete" aria-label="Delete"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button>
+    </div>
+  </header>
+  <article class="rep" id="repBody"></article>
+</section>
+
+<!-- ============================== OVERLAYS ============================== -->
+<div class="busy" id="busy"><div class="spinner"></div><b id="busyText">Analysing…</b><small id="busySub"></small></div>
+
+<div class="sheet" id="historySheet" aria-hidden="true">
+  <div class="sheet-card">
+    <div class="sheet-h"><h2>History</h2><button class="icon-btn" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div id="historyList" class="hist"></div>
+    <button class="link danger" id="btnClearAll">Delete all scans on this device</button>
+  </div>
+</div>
+
+<div class="sheet" id="guideSheet" aria-hidden="true">
+  <div class="sheet-card">
+    <div class="sheet-h"><h2>Using a phone lens kit</h2><button class="icon-btn" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="guide">
+      <svg class="guide-fig" viewBox="0 0 340 110" aria-hidden="true">
+        <ellipse cx="34" cy="55" rx="22" ry="30" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="55" r="8" fill="#D9541F"/>
+        <text x="34" y="102" text-anchor="middle">eye</text>
+        <path d="M120 20q12 35 0 70q-12-35 0-70z" fill="rgba(80,150,255,.25)" stroke="currentColor" stroke-width="2"/>
+        <text x="120" y="102" text-anchor="middle">20 D lens</text>
+        <path d="M58 55h50M132 55h120" stroke="#D9541F" stroke-width="2" stroke-dasharray="4 4"/>
+        <text x="88" y="45" text-anchor="middle">≈ 5 cm</text><text x="190" y="45" text-anchor="middle">≈ 15–40 cm</text>
+        <rect x="258" y="22" width="26" height="66" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="262" cy="34" r="3" fill="currentColor"/>
+        <text x="271" y="102" text-anchor="middle">phone</text>
+      </svg>
+      <ol>
+        <li><b>Kit:</b> a 20 D (or 28 D) aspheric condensing lens, ideally on a phone clip/adapter that keeps it in line with the main camera. Commercial smartphone fundus adapters also work.</li>
+        <li><b>Room:</b> dim the lights. A dilated pupil gives far better images (only as advised by a clinician).</li>
+        <li><b>Light:</b> tap <b>Torch</b> in the live camera — the phone LED next to the lens lights the retina.</li>
+        <li><b>Align:</b> hold the lens about 5 cm from the eye. Move the phone until the orange-red reflex fills the lens.</li>
+        <li><b>Focus:</b> slide the phone slowly back and forth until the vessels are sharp. Use zoom (2×) if the retina looks small.</li>
+        <li><b>Capture:</b> when <i>Retina</i>, <i>Focus</i> and <i>Light</i> turn green, FundusScan captures the sharpest frame automatically.</li>
+      </ol>
+      <p class="note"><b>Safety:</b> keep each attempt short (under about a minute of torch light per eye) and stop if the person is uncomfortable. This is a research prototype, not a certified medical device — every result must be confirmed by an eye-care professional.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="__ORT__"></script>
+<script src="fundus.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

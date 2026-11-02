@@ -104,6 +104,26 @@ Full numbers: [`results/metrics.json`](results/metrics.json) · [`results/classi
 | 3 | Severe NPDR | **Refer to ophthalmologist** |
 | 4 | Proliferative DR | **Refer urgently** |
 
+## 🌐 FundusScan Web — this branch
+
+> **Branch `web-app`** adds a phone version that deploys on **Vercel**. Any smartphone with a fundus lens kit
+> becomes the camera, and the full diagnosis report appears on the phone. The AI runs **in the phone's browser**
+> (ONNX Runtime Web), so photos are never uploaded. Setup and details: [`web/README.md`](web/README.md).
+
+<p align="center">
+<img src="docs/screenshots/web_home.jpg" width="19%"> <img src="docs/screenshots/web_camera.jpg" width="19%">
+<img src="docs/screenshots/web_review.jpg" width="19%"> <img src="docs/screenshots/web_report.jpg" width="19%">
+<img src="docs/screenshots/web_sharecard.jpg" width="19%">
+</p>
+<p align="center"><sub>Home · live lens camera with checks · retina-circle review · diagnosis report · share image (synthetic test image)</sub></p>
+
+```
+  phone + lens kit ─► live checks ─► auto-capture ─► AI grade on the phone ─► report · share · PDF
+```
+
+**Deploy:** commit `device/models/dr_model_fp32.onnx` → import the repo on vercel.com → pick this branch → Deploy.
+`vercel.json` already contains every setting.
+
 ## 📁 Repository structure
 
 ```
@@ -122,6 +142,11 @@ DR-Retinopathy-Fundus-Camera-/
 │   ├── config.json                    #    tuned thresholds, quality limits, test metrics
 │   ├── run.sh · check_camera.sh       #    command-line grading / camera test
 │   └── models/                        #    put dr_model_fp32.onnx here
+├── web/                               # ── FundusScan Web: phone version for Vercel (this branch)
+│   ├── src/                           #    app.js · fundus.js (browser port of pi_inference.py) · report · PWA
+│   ├── scripts/build.mjs              #    builds web/dist (copies model + device/config.json)
+│   └── README.md                      #    deploy + lens-kit guide
+├── vercel.json                        # ── Vercel build settings + headers
 ├── hardware/                          # ── physical device
 │   ├── BOM.csv                        #    bill of materials (₹39,390)
 │   ├── as-built-v1.md                 #    prototype v1 vs design
@@ -134,7 +159,7 @@ DR-Retinopathy-Fundus-Camera-/
 │   ├── paper/                         #    IEEE conference paper (.docx)
 │   ├── figures/                       #    block diagram, circuit, flowcharts, Gantt, BOM chart …
 │   ├── photos/                        #    prototype v1 photographs
-│   ├── screenshots/                   #    FundusScan app + diagnosis report
+│   ├── screenshots/                   #    Pi app, web app and reports
 │   ├── SETUP.md                       #    full setup guide (Colab + Raspberry Pi)
 │   └── HARDWARE.md                    #    hardware overview
 ├── scripts/figures/                   # ── regenerate every figure in the report & paper
@@ -250,6 +275,18 @@ Prototype cost **₹39,390 (≈ ₹40,000)** at Robu.in / retail prices (Nov 202
 - [ ] Touch-screen app (Odia / Hindi / English)
 - [ ] Ethics-approved data collection and validation against ophthalmologist grading
 - [ ] External testing on Messidor-2 and IDRiD
+
+## 👥 Team
+
+| Name | Role |
+|---|---|
+| **Omm Sanjog Barik** ([ORCID](https://orcid.org/0009-0009-4085-8099)) | **Team lead** — system architecture, hardware development, backend & software (training pipeline, on-device inference, quality gates), integration |
+| Laganjeet Jena | Hardware development — enclosure, mechanics, wiring, assembly |
+| Piyush Raj | GitHub, UI/UX and deployment |
+| Riddhi Khanna | GitHub, UI/UX and deployment |
+| **Prof. Prasant Kumar Patra** | Supervisor |
+
+School of Electronics Engineering, **KIIT (Deemed to be University)**, Bhubaneswar — Major Project (2026–2027)
 
 ## 📚 Citation
 
